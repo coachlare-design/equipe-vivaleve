@@ -1,0 +1,10 @@
+/*
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'sha256-B4Qy7vY6sa+aMonE7E4rQeacRUS/7WBureH+O+yYpeo='; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src https://api.equipe.vivaleve.conhecate.com; base-uri 'none'; form-action 'none'; object-src 'none'; manifest-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Cache-Control: no-store
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
