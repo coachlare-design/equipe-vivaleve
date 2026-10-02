@@ -1,17 +1,24 @@
-// Inscrição por convite: dados (com aviso de privacidade), verificação em duas etapas, frase-senha e chave criada NESTE
-// aparelho, código de recuperação.
+// Inscrição por convite: dados (com aviso de privacidade), frase-senha e chave criada NESTE aparelho, código de
+// recuperação, verificação em duas etapas.
 // Rodada 3 (persona associada B1): no celular, o app autenticador abre por um botão (link otpauth://) e a chave pode ser
 // copiada; o QR fica para quem vai usar outro aparelho. Linguagem simples no lugar de "2FA".
+// Simplificação de 02/10 (Carlos: "confuso e trabalhoso"): 4 telas com UMA tarefa cada, e a lista do que vem antes de
+// começar; o app autenticador é a última tela, com o código digitado logo abaixo de onde ele é ligado (o código vale
+// 30 s, por isso fica no fim); código de afiliado(a) e Calendly saíram daqui (a clínica preenche na aprovação, em
+// Associados > Dados); UM código de conferência no fim, no lugar de dois. Nada mudou na força da frase, da chave nem da
+// verificação em duas etapas.
 import { h, trocar, aviso, campo, entrada, formulario, dataBR, botao, copiar, blocos, blocoConferencia, EXPLICA_CONFERENCIA } from "./ui.js";
 import { post } from "./api.js";
 import * as cripto from "./cripto.js";
-import { impressao } from "./cofre-cripto.js";
+import { impressaoConjunta } from "./cofre-cripto.js";
 import { campoFraseGerada } from "./frase.js";
 
 const raiz = document.getElementById("app");
 // O token vem no fragmento (#t=...). Sai da barra de endereço na hora.
 const token = new URLSearchParams(location.hash.slice(1)).get("t") || "";
 history.replaceState(null, "", location.pathname);
+
+const TOTAL = 4;
 
 function moldura(...filhos) {
   trocar(raiz, h("main", { class: "porta" }, h("div", { class: "caixa" },
@@ -20,7 +27,11 @@ function moldura(...filhos) {
 }
 
 function passo(n) {
-  return h("span", { class: "pill", text: `passo ${n} de 3` });
+  return h("span", { class: "pill", text: `passo ${n} de ${TOTAL}` });
+}
+
+function cartao(n, titulo, ...filhos) {
+  return h("div", { class: "card" }, h("div", { class: "linha" }, h("h3", { text: titulo }), passo(n)), ...filhos);
 }
 
 const noCelular = () => window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 600;
@@ -41,7 +52,7 @@ async function inicio() {
     const dados = { token, nome: fd.get("nome"), crp, email: fd.get("email"), aceite_privacidade: aceite.checked,
       privacidade_versao: priv.versao };
     const r = await post("/api/convites/iniciar", dados);
-    await passoDois(conv, dados, r);
+    await passoFrase(conv, r);
   },
   campo("Nome completo", nome),
   campo("CRP", entrada({ name: "crp", required: true, placeholder: "05/12345", maxlength: "20", inputmode: "text" }), "Região, barra e número, como na carteira do Conselho."),
@@ -50,10 +61,47 @@ async function inicio() {
     h("ul", { class: "passo-a-passo pequeno" }, priv.itens.map((t) => h("li", { text: t })))),
   h("label", { class: "marcar" }, aceite, "Li o aviso de privacidade e concordo com o registro descrito nele."),
   h("button", { type: "submit", class: "btn", text: "Continuar" }));
+  const roteiro = h("div", { class: "mcard pilha" },
+    h("b", { text: "Como é a inscrição (uns 5 minutos)" }),
+    h("ol", { class: "passo-a-passo pequeno" },
+      h("li", { text: "Seus dados." }),
+      h("li", { text: "Guardar a sua frase-senha, criada pela plataforma." }),
+      h("li", { text: "Guardar um código de recuperação." }),
+      h("li", { text: "Ligar um app autenticador no celular." })),
+    h("p", { class: "pequeno", text: "Tenha o celular à mão. Se usa gerenciador de senhas (o do Google, o Chaves do iCloud, Bitwarden), deixe aberto: é lá que a frase e o código ficam guardados." }));
   moldura(h("h1", { text: conv.nome_sugerido ? `Bem-vindo(a), ${conv.nome_sugerido.split(" ")[0]}` : "Bem-vindo(a) à equipe" }),
     h("p", { class: "pequeno", text: `Convite de ${conv.convidado_por} · vale até ${dataBR(conv.expira_em)}` }),
-    h("div", { class: "card" }, h("div", { class: "linha" }, h("h3", { text: "Seus dados" }), passo(1)), form));
+    roteiro, cartao(1, "Seus dados", form));
   nome.focus();
+}
+
+async function passoFrase(conv, totp) {
+  // Rodada 2 (M4/B4): a frase é GERADA aqui (6 palavras; admin/RT 7, piso fixo no build).
+  const gerada = await campoFraseGerada(conv.papel === "admin" ? "admin" : "associado", "Sua frase-senha (criada pela plataforma)");
+  const form = formulario(async () => {
+    const f = gerada.valor();
+    if (cripto.contarPalavras(f) < Number(conv.min_palavras || 0)) throw new Error("O servidor pede mais palavras do que este pacote gera. Avise a clínica.");
+    await passoRecuperacao(conv, totp, f);
+    gerada.limpar();
+  },
+  gerada.el,
+  h("button", { type: "submit", class: "btn", text: "Guardei a frase, continuar" }));
+  moldura(h("h1", { text: "Sua frase-senha" }), cartao(2, "Frase-senha", form));
+}
+
+async function passoRecuperacao(conv, totp, frase) {
+  const codigo = await cripto.novoCodigoRecuperacao();
+  const textoCodigo = blocos(codigo, "blocos grade2");
+  const confirma = h("input", { type: "checkbox", name: "anotei", required: true });
+  confirma.dataset.rotulo = "Guardei o código de recuperação";
+  const form = formulario(async () => { passoAutenticador(conv, totp, frase, codigo); },
+    h("p", { text: "É o único jeito de voltar a entrar se você esquecer a frase-senha. Ele aparece só agora." }),
+    textoCodigo,
+    h("div", { class: "acoes-linha" }, botao("Copiar o código", () => copiar(codigo, "Código copiado. Cole no seu gerenciador de senhas.", textoCodigo), "btn mini ghost")),
+    h("p", { class: "pequeno", text: "Guarde no gerenciador de senhas, junto da frase, ou anote em papel e guarde longe do celular." }),
+    h("label", { class: "marcar" }, confirma, "Guardei o código de recuperação em lugar seguro."),
+    h("button", { type: "submit", class: "btn", text: "Continuar" }));
+  moldura(h("h1", { text: "Código de recuperação" }), cartao(3, "Recuperação", form));
 }
 
 function blocoAutenticador(totp) {
@@ -62,13 +110,11 @@ function blocoAutenticador(totp) {
   const abrir = uri.startsWith("otpauth://") ? h("a", { class: "btn", href: uri, text: "Abrir no app autenticador" }) : null;
   const textoChave = blocos(totp.totp_segredo);
   const copiarChave = botao("Copiar a chave", () => copiar(totp.totp_segredo, "Chave copiada. Cole no app autenticador.", textoChave), "btn ghost");
-  const comoFunciona = h("div", { class: "alerta b" }, h("b", { text: "O que é a verificação em duas etapas" }),
-    "Além da frase-senha, cada entrada pede um código de 6 números que muda a cada 30 segundos. Ele aparece num app "
-    + "autenticador no seu celular. Assim, mesmo que alguém descubra a sua frase, não entra sem o seu celular.");
-  const semApp = h("p", { class: "pequeno", text: "Não tem app? Instale o Google Authenticator (Android ou iPhone), o Microsoft Authenticator ou o Aegis e volte aqui." });
-  const chave = h("div", {}, h("p", { class: "pequeno", text: "Chave para digitar ou colar no app (tipo: com base no tempo):" }), textoChave);
+  const semApp = h("p", { class: "pequeno", text: "Não tem app? Instale o Google Authenticator ou o Microsoft Authenticator (Android ou iPhone) e volte aqui." });
+  const chave = h("details", {}, h("summary", { text: "Digitar a chave à mão" }),
+    h("p", { class: "pequeno", text: "Chave para digitar ou colar no app (tipo: com base no tempo):" }), textoChave);
   if (noCelular()) {
-    return h("div", { class: "mcard pilha" }, h("b", { text: "1. Ligue o app autenticador" }), comoFunciona, semApp,
+    return h("div", { class: "pilha" }, h("b", { text: "1. Ligue o app" }), semApp,
       h("ol", { class: "passo-a-passo pequeno" },
         h("li", { text: "Toque em \"Abrir no app autenticador\". O app abre e já cadastra a Viva Leve Psi." }),
         h("li", { text: "Se o app não abrir, toque em \"Copiar a chave\", abra o app, escolha \"inserir chave\" e cole." }),
@@ -76,39 +122,14 @@ function blocoAutenticador(totp) {
       h("div", { class: "acoes-linha" }, abrir, copiarChave), chave,
       h("details", {}, h("summary", { text: "Vou usar outro aparelho (mostrar QR code)" }), img));
   }
-  return h("div", { class: "mcard pilha" }, h("b", { text: "1. Ligue o app autenticador" }), comoFunciona, semApp,
+  return h("div", { class: "pilha" }, h("b", { text: "1. Ligue o app" }), semApp,
     h("div", { class: "linha topo-al quebra" }, img, h("p", { class: "pequeno", text: "Abra o app no celular, toque em adicionar e aponte a câmera para o QR code." })),
     chave, h("div", { class: "acoes-linha" }, copiarChave));
 }
 
-async function passoDois(conv, dados, totp) {
-  // Rodada 2 (M4/B4): a frase é GERADA aqui (6 palavras; admin/RT 7, piso fixo no build).
-  const gerada = await campoFraseGerada(conv.papel === "admin" ? "admin" : "associado", "2. Sua frase-senha (criada pela plataforma)");
-  const form = formulario(async (fd) => {
-    const f = gerada.valor();
-    if (cripto.contarPalavras(f) < Number(conv.min_palavras || 0)) throw new Error("O servidor pede mais palavras do que este pacote gera. Avise a clínica.");
-    passoTres(conv, dados, f, { afiliado: fd.get("afiliado"), calendly: fd.get("calendly") });
-    gerada.limpar();
-  },
-  blocoAutenticador(totp),
-  gerada.el,
-  conv.papel === "associado" ? [
-    // Rodada 4 (A1/P12): o que é cada campo, e que pode ficar em branco.
-    campo("Seu código de afiliado(a) na Kiwify (se já tiver)", entrada({ name: "afiliado", maxlength: "80" }),
-      "A Kiwify é onde o(a) paciente paga. O código de afiliado(a) liga a compra a você. Se não sabe o que é, deixe em branco: a clínica confere na aprovação."),
-    campo("Seu link do Calendly (se já tiver)", entrada({ name: "calendly", maxlength: "300", placeholder: "https://calendly.com/...", inputmode: "url" }),
-      "O Calendly é a agenda on-line onde o(a) paciente marca a entrevista. Se ainda não tem, deixe em branco."),
-  ] : null,
-  h("button", { type: "submit", class: "btn", text: "Continuar" }));
-  moldura(h("h1", { text: "Segurança da conta" }), h("div", { class: "card" }, h("div", { class: "linha" }, h("h3", { text: "App autenticador e frase-senha" }), passo(2)), form));
-}
-
-async function passoTres(conv, dados, frase, extra) {
-  const codigo = await cripto.novoCodigoRecuperacao();
-  const textoCodigo = blocos(codigo, "blocos grade2");
+function passoAutenticador(conv, totp, frase, codigo) {
   const status = h("p", { class: "pequeno", role: "status", "aria-live": "polite" });
-  const confirma = h("input", { type: "checkbox", name: "anotei", required: true });
-  confirma.dataset.rotulo = "Guardei o código de recuperação";
+  const campoCodigo = entrada({ name: "totp", inputmode: "numeric", autocomplete: "one-time-code", required: true, maxlength: "7" });
   const form = formulario({ travarAoConcluir: true }, async (fd) => {
     const cod = String(fd.get("totp") || "").replace(/\D/g, "");
     if (cod.length !== 6) throw new Error("Digite o código de 6 números que aparece no app autenticador.");
@@ -117,22 +138,18 @@ async function passoTres(conv, dados, frase, extra) {
     try {
       const k = cripto.parametrosNovos(conv.kdf); // nunca abaixo do piso fixo do build (achado 1)
       const pac = await cripto.pacoteInscricao(frase, codigo, k.ops, k.mem);
-      const r = await post("/api/convites/concluir", { token, totp: cod, ...pac,
-        kiwify_afiliado_id: extra.afiliado || null, calendly_url: extra.calendly || null });
-      // Rodada 4 (NB1): códigos de conferência calculados NESTE aparelho (da chave que acabou de nascer aqui), para ler ao
-      // responsável técnico por telefone antes da aprovação.
-      fim(r, { cifra: await impressao(pac.chave_publica), assinatura: await impressao(pac.chave_assinatura) });
+      // Afiliado(a) e Calendly não são pedidos aqui: a clínica preenche na aprovação.
+      const r = await post("/api/convites/concluir", { token, totp: cod, ...pac, kiwify_afiliado_id: null, calendly_url: null });
+      // Rodada 4 (NB1): código de conferência calculado NESTE aparelho (das chaves que acabaram de nascer aqui), para ler
+      // ao responsável técnico por telefone antes da aprovação.
+      fim(r, { conjunta: await impressaoConjunta(pac.chave_publica, pac.chave_assinatura) });
     } finally { status.className = "pequeno"; if (status.textContent.startsWith("Criando")) status.textContent = ""; }
   },
-  h("div", { class: "alerta" }, h("b", { text: "Código de recuperação" }),
-    "É o único jeito de voltar a entrar se você esquecer a frase-senha. Ele aparece só agora. Guarde no gerenciador de senhas "
-    + "ou anote em papel, longe do celular."),
-  textoCodigo,
-  h("div", { class: "acoes-linha" }, botao("Copiar o código", () => copiar(codigo, "Código copiado. Cole no seu gerenciador de senhas.", textoCodigo), "btn mini ghost")),
-  h("label", { class: "marcar" }, confirma, "Guardei o código de recuperação em lugar seguro."),
-  campo("Código de 6 números do app autenticador", entrada({ name: "totp", inputmode: "numeric", autocomplete: "one-time-code", required: true, maxlength: "7" })),
+  h("p", { class: "pequeno", text: "Além da frase-senha, cada entrada pede um código de 6 números que muda a cada 30 segundos e aparece no app do seu celular. Assim, mesmo que alguém descubra a sua frase, não entra sem o seu celular." }),
+  blocoAutenticador(totp),
+  campo("2. Digite o código de 6 números que apareceu no app", campoCodigo),
   h("button", { type: "submit", class: "btn", text: "Concluir cadastro" }), status);
-  moldura(h("h1", { text: "Quase lá" }), h("div", { class: "card" }, h("div", { class: "linha" }, h("h3", { text: "Recuperação" }), passo(3)), form),
+  moldura(h("h1", { text: "Último passo" }), cartao(4, "App autenticador", form),
     h("p", { class: "pequeno", text: "Sua frase-senha nunca sai do seu aparelho. A clínica recebe só a parte que serve para conferir a entrada." }));
 }
 
@@ -144,11 +161,10 @@ function fim(r, imps) {
   }
   moldura(h("h1", { text: "Cadastro enviado" }),
     h("div", { class: "card pilha" },
-      h("p", { text: "O responsável técnico da clínica vai ligar para você e pedir estes dois códigos de conferência. Leia para o responsável técnico por telefone, grupo por grupo: ele confere com o que aparece na tela dele e libera o seu acesso, em geral no mesmo dia útil." }),
-      blocoConferencia("Código de conferência 1", imps.cifra),
-      blocoConferencia("Código de conferência 2", imps.assinatura),
-      h("details", {}, h("summary", { text: "Para que servem?" }), h("p", { class: "pequeno", text: EXPLICA_CONFERENCIA })),
-      h("p", { class: "pequeno", text: "Não são senha: pode ler em voz alta, mas não mande por mensagem. Se fechar esta tela, entre com o seu e-mail, a frase-senha e o código do app: enquanto aguarda, a plataforma mostra só estes códigos." })),
+      h("p", { text: "O responsável técnico da clínica vai ligar para você e pedir este código de conferência. Leia para o responsável técnico por telefone, grupo por grupo: ele confere com o que aparece na tela dele e libera o seu acesso, em geral no mesmo dia útil." }),
+      blocoConferencia("Código de conferência", imps.conjunta),
+      h("details", {}, h("summary", { text: "Para que serve?" }), h("p", { class: "pequeno", text: EXPLICA_CONFERENCIA })),
+      h("p", { class: "pequeno", text: "Não é senha: pode ler em voz alta, mas não mande por mensagem. Se fechar esta tela, entre com o seu e-mail, a frase-senha e o código do app: enquanto aguarda, a plataforma mostra só este código." })),
     h("p", { class: "pequeno", text: "Você recebe um e-mail quando for liberado(a)." }),
     h("a", { class: "btn ghost", href: "index.html", text: "Ir para a entrada" }));
 }

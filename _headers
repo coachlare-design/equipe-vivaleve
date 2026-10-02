@@ -1,5 +1,5 @@
 /*
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'sha256-0OeBgIIh3Lz5BePEtPqjmpmBAuIR8xkoiFNJcu7e+Hw='; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src https://api.equipe.vivaleve.conhecate.com; base-uri 'none'; form-action 'none'; object-src 'none'; manifest-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'sha256-CQ2dDVMOJvbwYahyF2QgCoVtDyUPG7qDaqASpGlCaz8='; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src https://api.equipe.vivaleve.conhecate.com; base-uri 'none'; form-action 'none'; object-src 'none'; manifest-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'; frame-ancestors 'none'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   X-Frame-Options: DENY

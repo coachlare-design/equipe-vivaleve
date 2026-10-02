@@ -63,6 +63,20 @@ export async function impressao(publica) {
   return grupos(base32(s.crypto_generichash(32, pub)).slice(0, 16));
 }
 
+// Simplificação de 02/10 (inscrição): UM código de conferência para as duas chaves do(a) associado(a) (X25519 de cifra e
+// Ed25519 de assinatura), no lugar de dois. BLAKE2b-256 de "vl:conf:v1|" || cifra || assinatura, 80 bits como cada
+// impressão isolada: trocar qualquer uma das duas chaves muda o código. As impressões do RT e da mestra (pacote do site)
+// continuam separadas.
+export async function impressaoConjunta(publicaCifra, publicaAssinatura) {
+  const s = await obterSodium();
+  const c = typeof publicaCifra === "string" ? deB64(publicaCifra) : publicaCifra;
+  const a = typeof publicaAssinatura === "string" ? deB64(publicaAssinatura) : publicaAssinatura;
+  const rotulo = new TextEncoder().encode("vl:conf:v1|");
+  const tudo = new Uint8Array(rotulo.length + c.length + a.length);
+  tudo.set(rotulo, 0); tudo.set(c, rotulo.length); tudo.set(a, rotulo.length + c.length);
+  return grupos(base32(s.crypto_generichash(32, tudo)).slice(0, 16));
+}
+
 // ---------------------------------------------------------------- registros
 
 export async function cifrarRegistro({ tipo, dados, pacienteId, autorId, destinatarios, mestra, uid = null, chave = null, nonce = null }) {

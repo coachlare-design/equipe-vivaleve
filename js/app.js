@@ -4,7 +4,7 @@
 // explicação do motivo na tela de entrada.
 import { h, trocar, aviso, limparAvisos, limparAvisosAntigos, campo, entrada, formulario, definirClinica, confirmar, comMostrar,
   blocoConferencia, EXPLICA_CONFERENCIA, rotuloRT } from "./ui.js";
-import { impressao } from "./cofre-cripto.js";
+import { impressaoConjunta } from "./cofre-cripto.js";
 import { get, post, definirCsrf, quandoExpirar } from "./api.js";
 import * as cripto from "./cripto.js";
 import * as A from "./telas-associado.js";
@@ -185,24 +185,23 @@ async function impressoesCalculadas(chaves, embrulho) {
     }
     const par = await cripto.parAssinatura(privada);
     s.memzero(par.privada);
-    return { cifra: await impressao(publica), assinatura: await impressao(par.publica) };
+    return { conjunta: await impressaoConjunta(publica, par.publica) };
   } finally { s.memzero(privada); }
 }
 
-// Tela única de quem ainda aguarda a aprovação: os dois códigos e nada mais (sem sessão, sem menu).
+// Tela única de quem ainda aguarda a aprovação: o código de conferência e nada mais (sem sessão, sem menu).
 function telaAguardando(nome, email, imps, erro) {
   ultimoEmail = email || ultimoEmail;
   const primeiro = String(nome || "").split(" ")[0];
   trocar(raiz, h("main", { class: "porta" }, h("div", { class: "caixa" },
     h("div", { class: "marca" }, h("span", { class: "ponto" }), "Viva Leve Psi · Equipe"),
     h("h1", { text: primeiro ? `${primeiro}, seu cadastro aguarda a aprovação` : "Cadastro aguardando aprovação" }),
-    erro ? h("div", { class: "alerta r", role: "alert" }, h("b", { text: "Não deu para calcular os códigos" }), erro.message || "Tente de novo.")
+    erro ? h("div", { class: "alerta r", role: "alert" }, h("b", { text: "Não deu para calcular o código" }), erro.message || "Tente de novo.")
       : h("div", { class: "card pilha" },
-        h("p", { text: `Leia para ${rotuloRT()} por telefone estes dois códigos de conferência, grupo por grupo. Ele confere com o que aparece na tela dele antes de liberar o seu acesso.` }),
-        blocoConferencia("Código de conferência 1", imps.cifra),
-        blocoConferencia("Código de conferência 2", imps.assinatura),
-        h("details", {}, h("summary", { text: "Para que servem?" }), h("p", { class: "pequeno", text: EXPLICA_CONFERENCIA })),
-        h("p", { class: "pequeno", text: "Estes códigos foram calculados neste aparelho, a partir da sua frase-senha. Não são senha: pode ler em voz alta. Nunca mande por mensagem." })),
+        h("p", { text: `Leia para ${rotuloRT()} por telefone este código de conferência, grupo por grupo. Ele confere com o que aparece na tela dele antes de liberar o seu acesso.` }),
+        blocoConferencia("Código de conferência", imps.conjunta),
+        h("details", {}, h("summary", { text: "Para que serve?" }), h("p", { class: "pequeno", text: EXPLICA_CONFERENCIA })),
+        h("p", { class: "pequeno", text: "Este código foi calculado neste aparelho, a partir da sua frase-senha. Não é senha: pode ler em voz alta. Nunca mande por mensagem." })),
     h("p", { class: "pequeno", text: "Enquanto o cadastro não for aprovado, a plataforma mostra só esta tela. Você recebe um e-mail quando o acesso estiver liberado." }),
     h("button", { type: "button", class: "btn ghost", text: "Voltar para a entrada", onclick: () => telaEntrada() }))));
   window.scrollTo(0, 0);

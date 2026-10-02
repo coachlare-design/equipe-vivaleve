@@ -12,7 +12,7 @@ import * as cripto from "./cripto.js";
 import * as ext from "./extensoes.js";
 import * as sessao from "./cofre-sessao.js";
 import { montarProntuario, editorTexto, salvarRegistro, formAbrirChave, formTermoAnexo } from "./prontuario-ui.js";
-import { impressao } from "./cofre-cripto.js";
+import { impressao, impressaoConjunta } from "./cofre-cripto.js";
 import * as telasCofre from "./telas-cofre.js";
 
 ext.registrar("prontuario", (el, ctx) => { montarProntuario(el, ctx); });
@@ -63,17 +63,21 @@ ext.registrar("destravar-cofre", async (el, { recarregar, usuario }) => {
   if (cripto.cofre.privada) {
     // Rodada 2 (A1/A2): "Minha chave": impressões CALCULADAS neste aparelho, para o RT conferir por telefone ou
     // pessoalmente antes de certificar ou de repassar um prontuário para você.
+    // Simplificação de 02/10: associado(a) vê UM código (as duas chaves juntas), o mesmo da tela de aprovação do RT.
+    // O RT continua vendo os dois, porque são as impressões separadas que vão no pacote do site.
+    const ehRt = Boolean(usuario && usuario.rt);
     const impCifra = await impressao(cripto.cofre.publica);
     const impAssin = cripto.cofre.assinaturaPublica ? await impressao(cripto.cofre.assinaturaPublica) : "(indisponível)";
+    const impConj = cripto.cofre.assinaturaPublica ? await impressaoConjunta(cripto.cofre.publica, cripto.cofre.assinaturaPublica) : "(indisponível)";
     trocar(el, h("div", { class: "caixa-cifrada pilha" },
       h("p", { class: "pequeno", text: "Sua chave está aberta só nesta aba. Ela fecha sozinha depois de 15 minutos sem uso, ao sair, ao fechar a aba ou com a aba escondida por mais de 1 minuto." }),
-      h("h3", { text: "Minha chave: códigos de conferência" }),
-      blocoConferencia("Código de conferência 1", impCifra),
-      blocoConferencia("Código de conferência 2", impAssin),
-      h("details", {}, h("summary", { text: "Para que servem?" }), h("p", { class: "pequeno", text: EXPLICA_CONFERENCIA })),
+      h("h3", { text: ehRt ? "Minha chave: códigos de conferência" : "Minha chave: código de conferência" }),
+      ehRt ? [blocoConferencia("Código de conferência 1", impCifra), blocoConferencia("Código de conferência 2", impAssin)]
+        : blocoConferencia("Código de conferência", impConj),
+      h("details", {}, h("summary", { text: ehRt ? "Para que servem?" : "Para que serve?" }), h("p", { class: "pequeno", text: EXPLICA_CONFERENCIA })),
       h("p", { class: "pequeno", text: usuario && usuario.rt
         ? "Calculados neste aparelho. São os códigos da sua chave de responsável técnico que vão no pacote do site."
-        : `Calculados neste aparelho. Quando ${rotuloRT()} pedir, leia estes códigos por telefone ou pessoalmente, grupo por grupo (nunca pela plataforma).` }),
+        : `Calculado neste aparelho. Quando ${rotuloRT()} pedir, leia este código por telefone ou pessoalmente, grupo por grupo (nunca pela plataforma).` }),
       botao("Fechar a chave agora", async () => { cripto.limparCofre(); aviso("Chave fechada."); recarregar(); }, "btn mini ghost")));
   } else {
     trocar(el, formAbrirChave(async () => recarregar()));

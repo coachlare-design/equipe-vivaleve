@@ -10,7 +10,7 @@ import { h, trocar, aviso, campo, entrada, formulario, botao, pill, vazio, selec
 import { get, post } from "./api.js";
 import * as ext from "./extensoes.js";
 import * as cripto from "./cripto.js";
-import { impressao } from "./cofre-cripto.js";
+import { impressaoConjunta } from "./cofre-cripto.js";
 import * as certs from "./certificados.js";
 
 const PILL_STATUS_PESSOA = { ativo: "g", pendente: "", suspenso: "w", revogado: "r" };
@@ -303,22 +303,21 @@ function prepararCertificado(container, p) {
       if (!(await certs.assinaturaDoRt(cripto.b64(cripto.cofre.assinaturaPublica)))) {
         throw new Error("A sua chave de assinatura não é a do RT gravada no pacote do site: os navegadores recusariam esta conferência. Fale com o suporte técnico.");
       }
-      const impC = await impressao(p.chave_publica);
-      const impA = await impressao(p.chave_assinatura);
+      const imp = await impressaoConjunta(p.chave_publica, p.chave_assinatura);
       const conferi = h("input", { type: "checkbox" });
-      // Rodada 4 (NB1): a pessoa pendente vê os dois códigos na última tela da inscrição e, ao entrar, numa tela
-      // "aguardando aprovação". Aqui eles aparecem lado a lado, em grupos de 4 com as palavras, para conferir por telefone.
+      // Rodada 4 (NB1) + simplificação de 02/10: a pessoa pendente vê UM código (as duas chaves juntas) na última tela da
+      // inscrição e, ao entrar, numa tela "aguardando aprovação". Aqui ele aparece em grupos de 4 com as palavras.
       const caixa = h("div", { class: "alerta b pilha" }, h("b", { text: `Conferir a chave de ${p.nome}` }),
         h("ol", { class: "passo-a-passo pequeno" },
           h("li", { text: `Ligue para ${p.nome.split(" ")[0]} (ou fale pessoalmente). Não use mensagem escrita.` }),
-          h("li", { text: "Peça para a pessoa ler os dois códigos de conferência que aparecem na tela dela: no fim da inscrição ou ao entrar na plataforma (tela \"aguardando aprovação\")." }),
-          h("li", { text: "Confira grupo por grupo com os códigos abaixo. Só confirme se TODOS os grupos dos dois códigos baterem. Se algum for diferente, não aprove e avise o suporte técnico." })),
-        h("div", { class: "lado-a-lado" }, blocoConferencia("Código de conferência 1", impC), blocoConferencia("Código de conferência 2", impA)),
-        h("details", {}, h("summary", { text: "Para que servem?" }), h("p", { class: "pequeno", text: EXPLICA_CONFERENCIA })),
-        h("label", { class: "marcar" }, conferi, "Conferi os dois códigos com a pessoa, por telefone ou pessoalmente, e todos os grupos bateram."),
+          h("li", { text: "Peça para a pessoa ler o código de conferência que aparece na tela dela: no fim da inscrição ou ao entrar na plataforma (tela \"aguardando aprovação\")." }),
+          h("li", { text: "Confira grupo por grupo com o código abaixo. Só confirme se TODOS os grupos baterem. Se algum for diferente, não aprove e avise o suporte técnico." })),
+        blocoConferencia("Código de conferência", imp),
+        h("details", {}, h("summary", { text: "Para que serve?" }), h("p", { class: "pequeno", text: EXPLICA_CONFERENCIA })),
+        h("label", { class: "marcar" }, conferi, "Conferi o código com a pessoa, por telefone ou pessoalmente, e todos os grupos bateram."),
         h("div", { class: "acoes" },
           botao("Confirmar", async () => {
-            if (!conferi.checked) throw new Error("Confira os dois códigos com a pessoa antes.");
+            if (!conferi.checked) throw new Error("Confira o código com a pessoa antes.");
             const desde = new Date().toISOString();
             const assinatura = await certs.assinarCertificado({ id: p.id, codigo: p.codigo, crp: p.crp, chave_publica: p.chave_publica,
               chave_assinatura: p.chave_assinatura }, desde, cripto.cofre.privada);

@@ -406,8 +406,8 @@ export function gruposConferencia(imp) {
 export function grupoFalado(grupo) {
   return [...grupo].map((c) => FALADO[c] || c).join(", ");
 }
-export const EXPLICA_CONFERENCIA = "O código 1 confere a chave que tranca as suas notas (só você abre). O código 2 confere a sua "
-  + "assinatura (prova que a nota foi escrita por você). O responsável técnico confere os dois para garantir que ninguém trocou a sua chave no caminho.";
+export const EXPLICA_CONFERENCIA = "O código resume as suas duas chaves: a que tranca as suas notas (só você abre) e a que assina "
+  + "(prova que a nota foi escrita por você). O responsável técnico confere o código para garantir que ninguém trocou as suas chaves no caminho.";
 
 export function blocoConferencia(rotulo, imp) {
   const grupos = gruposConferencia(imp);
