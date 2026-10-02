@@ -7,8 +7,8 @@ export const API = "https://api.equipe.vivaleve.conhecate.com";
 //                 RT anteriores, para conferir certificados e notas antigas). Só certificado assinado por ela vale.
 // Build de produção RECUSA sair com qualquer uma vazia (exceto --bootstrap, a 1ª subida, em que o cofre fica fechado).
 // Sem build (testes no Node), os testes preenchem estas propriedades.
-export const IMPRESSOES = { mestra: "", rt: "", rt_assinatura: "" };
-export const BOOTSTRAP = "1" === "1";
+export const IMPRESSOES = { mestra: "5CID-GFR7-WYWF-7QRJ", rt: "ONUB-PN37-REWO-P2YK", rt_assinatura: "76DA-5SXR-65HJ-JGR7" };
+export const BOOTSTRAP = "0" === "1";
 // Achado 1: parâmetros do Argon2id para derivações NOVAS, fixados no build (build.py --kdf-ops/--kdf-mem, nunca abaixo do
 // piso ops 3 / 64 MiB, que também está fixo em cripto.js). Sem build (testes no Node), vale o piso.
 export const KDF = { ops: Number("3") || 3, mem: Number("67108864") || 64 * 1024 * 1024 };
