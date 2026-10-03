@@ -946,7 +946,7 @@ export async function termo(el, _p, ctx) {
   },
   campo("Nome da versão", entrada({ name: "versao", required: true, minlength: "2", maxlength: "20", placeholder: "ex.: v1" })),
   campo("Texto completo", h("textarea", { class: "entrada", name: "texto", required: true, minlength: "200", rows: "12" })),
-  h("label", { class: "marcar" }, h("input", { type: "checkbox", name: "provisorio", checked: true }), "Ainda é provisório (falta a revisão jurídica)"),
+  h("label", { class: "marcar" }, h("input", { type: "checkbox", name: "provisorio" }), "Versão provisória"),
   campoTotp(),
   h("button", { type: "submit", class: "btn", text: "Publicar versão" }));
   trocar(el, h("h1", { text: "Termo do(a) paciente" }),
