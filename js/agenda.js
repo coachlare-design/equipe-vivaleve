@@ -1,5 +1,6 @@
 // AGENDA DA EQUIPE (só admin/RT): horários livres e agendados dos Calendly de cada profissional, numa grade da semana.
 // Cores por profissional: claro = livre, cheio = agendado (com o nome do(a) paciente), cinza riscado = cancelado.
+// Conta SEM TOKEN (só o link público): mostra os livres e, quando um some, "ocupado" cheio, sem nome.
 // A tela consulta a API a cada 30 s; aviso novo (agendou, remarcou, cancelou) toca um som, mostra o aviso no topo e,
 // se a pessoa permitir, uma notificação do computador. A coleta no Calendly é do servidor (a cada 2 min).
 import { h, trocar, aviso, botao, campo, entrada, selecao, formulario, SEM_CORRETOR, dataHoraBR, confirmar, vazio } from "./ui.js";
@@ -81,6 +82,7 @@ function grade(d, contas) {
   const chave = (iso) => `${diaDe(iso)}|${horaDe(iso).slice(0, 2)}`;
   const por = (k) => { if (!celulas.has(k)) celulas.set(k, []); return celulas.get(k); };
   for (const e of d.eventos) if (porConta[e.conta_id]) por(chave(e.inicio)).push({ ...e, tipo: e.status === "cancelado" ? "cancelado" : "agendado" });
+  // tipo "agendado" cobre também o "ocupado" do modo sem token (mesma cor cheia, rótulo "ocupado")
   for (const l of d.livres) if (porConta[l.conta_id]) por(chave(l.inicio)).push({ ...l, tipo: "livre" });
   const hoje = fmtDia.format(new Date());
   const linhas = [];
@@ -94,7 +96,7 @@ function grade(d, contas) {
         const c = porConta[it.conta_id];
         const hora = horaDe(it.inicio);
         if (it.tipo === "livre") return h("span", { class: `ag-item livre ag-c-${c.cor}`, title: `${c.nome}: livre às ${hora}`, text: `${c.nome} ${hora}` });
-        const nome = it.paciente_nome || "paciente";
+        const nome = it.paciente_nome || (it.status === "ocupado" ? "ocupado (sem nome)" : "paciente");
         const titulo = `${c.nome} · ${nome}${it.paciente_whatsapp ? ` · WhatsApp ${it.paciente_whatsapp}` : ""} · ${hora}${it.remarcado ? " · remarcado" : ""}`;
         return h("span", { class: `ag-item ${it.tipo} ag-c-${c.cor}`, title: titulo },
           h("b", { text: `${hora} ${c.nome}` }), h("span", { text: nome }));
@@ -112,7 +114,8 @@ function proximos(d, contas) {
   return h("ul", { class: "ag-lista" }, lista.map((e) => {
     const c = porConta[e.conta_id];
     return h("li", { class: `ag-c-${c.cor}` }, h("i", { class: "ag-bola" }),
-      h("b", { text: `${rotuloDia(diaDe(e.inicio))} ${horaDe(e.inicio)}` }), ` · ${c.nome} · ${e.paciente_nome || "paciente"}`,
+      h("b", { text: `${rotuloDia(diaDe(e.inicio))} ${horaDe(e.inicio)}` }),
+      ` · ${c.nome} · ${e.paciente_nome || (e.status === "ocupado" ? "horário ocupado (sem nome)" : "paciente")}`,
       e.paciente_whatsapp ? ` · ${e.paciente_whatsapp}` : "", e.remarcado ? " · remarcado" : "");
   }));
 }
@@ -135,16 +138,31 @@ function formConta(aoTerminar, conta = null) {
   h("button", { type: "submit", class: "btn", text: conta ? "Trocar token" : "Conectar" }));
 }
 
+function formPublico(aoTerminar) {
+  return formulario(async (fd, f) => {
+    await post("/api/admin/agenda/contas/publica", { nome: String(fd.get("nome")).trim(), cor: fd.get("cor"), link: String(fd.get("link")).trim() });
+    f.reset();
+    aviso("Agenda conectada pelo link público. Quando o token chegar, conecte com o mesmo nome.");
+    aoTerminar();
+  },
+  campo("Nome no painel", entrada({ name: "nome", required: true, maxlength: "40" })),
+  campo("Cor", selecao("cor", CORES, "azul")),
+  campo("Link do Calendly", entrada({ name: "link", type: "url", required: true, placeholder: "https://calendly.com/usuario/sessao-de-terapia" }),
+    "Sem token o painel mostra os horários livres e marca \"ocupado\" quando um some, mas não mostra o nome do(a) paciente."),
+  h("button", { type: "submit", class: "btn", text: "Conectar sem token" }));
+}
+
 function cartaoContas(contas, recarregar) {
   const corpo = h("div", { class: "ag-contas" });
   for (const c of contas) {
     const erro = c.ultimo_erro ? h("p", { class: "erro-botao", text: `Último problema: ${c.ultimo_erro.replace(/^\S+\s/, "")}` }) : null;
     corpo.append(h("div", { class: `ag-conta ag-c-${c.cor}` },
       h("div", { class: "linha" }, h("i", { class: "ag-bola" }), h("b", { text: c.nome })),
+      h("p", { class: "pequeno", text: c.modo === "publico" ? "Sem token: só horários livres e ocupados, sem nome." : c.modo === "token" ? "Com token: agenda completa, com nomes." : "Ainda não conectada." }),
       h("p", { class: "pequeno", text: c.ultima_coleta_em ? `Lido em ${dataHoraBR(c.ultima_coleta_em)}` : "Ainda não lido" }),
       c.agendar_url ? h("p", { class: "pequeno" }, h("a", { href: c.agendar_url, target: "_blank", rel: "noopener noreferrer", text: "Abrir o Calendly" })) : null,
       erro,
-      h("details", {}, h("summary", { text: "Trocar token" }), formConta(recarregar, c)),
+      h("details", {}, h("summary", { text: c.modo === "publico" ? "Conectar o token (modo completo)" : "Trocar token" }), formConta(recarregar, c)),
       botao("Desconectar", async () => {
         const ok = await confirmar({ titulo: `Desconectar ${c.nome}?`, texto: "O token é apagado e a agenda dessa pessoa sai do painel.", textoConfirmar: "Desconectar", perigo: true });
         if (!ok) return;
@@ -155,7 +173,8 @@ function cartaoContas(contas, recarregar) {
   }
   return h("details", { class: "card", open: contas.length ? null : true },
     h("summary", { text: contas.length ? "Contas do Calendly conectadas" : "Conectar o primeiro Calendly" }),
-    corpo, h("h3", { text: "Conectar outra conta" }), formConta(recarregar));
+    corpo, h("h3", { text: "Conectar outra conta com token (completo)" }), formConta(recarregar),
+    h("h3", { text: "Conectar sem token (só o link público)" }), formPublico(recarregar));
 }
 
 async function tela(el) {
