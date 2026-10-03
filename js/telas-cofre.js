@@ -354,7 +354,7 @@ async function descarte(el, ctx) {
     h("div", { class: "card pilha" },
       h("p", { class: "pequeno", text: "Rotina: 1) conferir que não há processo, sindicância ou pedido do(a) titular em curso; 2) conferir que passaram 5 anos do último atendimento e o(a) paciente está encerrado(a) ou cancelado(a); 3) digitar o P-código, o motivo e o código do app autenticador." }),
       // M1 (d): o texto não promete o que não acontece.
-      h("p", { class: "pequeno", text: "No banco vivo, o servidor apaga o texto protegido e todos os acessos a ele (inclusive o da chave-mestra) e registra o descarte; depois disso o prontuário não aceita registro novo. As cópias continuam nos backups até a retenção apagá-los (diários: 35 dias; mensais: 5 anos e 30 dias, apagados à mão na conta separada do backup). A eliminação só se completa quando o último backup com o registro for apagado." })),
+      h("p", { class: "pequeno", text: "No banco vivo, o servidor apaga o texto protegido e todos os acessos a ele (inclusive o da chave-mestra) e registra o descarte; depois disso o prontuário não aceita registro novo. As cópias continuam nos backups até a retenção apagá-los (diários: 35 dias; mensais: 5 anos e 30 dias, apagados à mão na pasta do backup no Google Drive). A eliminação só se completa quando o último backup com o registro for apagado." })),
     h("h2", { text: `Elegíveis agora (${elegiveis.length})` }),
     elegiveis.length ? elegiveis.map((x) => {
       const cod = entrada({ name: "cod", autocomplete: "off", maxlength: "12" });

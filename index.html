@@ -3,17 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'sha256-LOWiMd25e7n/MolyM9wf3mipxWUJ1tvvFFwHkxPjY8k='; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src https://api.equipe.vivaleve.conhecate.com; base-uri 'none'; form-action 'none'; object-src 'none'; manifest-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'sha256-ru1VA+eSUpL3JUILHjLKPyeX0kDTDMdIT3Z0F4ComGo='; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src https://api.equipe.vivaleve.conhecate.com; base-uri 'none'; form-action 'none'; object-src 'none'; manifest-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#2E9BD6">
 <title>Equipe Conheça-TE Psi</title>
-<link rel="stylesheet" href="css/app.css" integrity="sha384-aXCvLrJm2/qw90NzCeL7z+W16cL1i4PFVah96wuxqaUN4BjqAZoP6iNhj5/Kfq6h">
+<link rel="stylesheet" href="css/app.css" integrity="sha384-7NXJbrhefh7Fc4Enu08HRNgoAlYcSqKCsPMH3dWo4aI5xS6jR+lW4wr09QY7D3rN">
 <script type="importmap">{
  "imports": {},
  "integrity": {
+  "./js/agenda.js": "sha384-tu/n26cQVdVd2lsGbPRaKm3zA6NIoWGdJUSDlg8dNntDQrjRUcZUC/giduG4FPhM",
   "./js/api.js": "sha384-wKl+Eh8cdNdezLK3Kox3VfFtFVm68AlU5qRHta3vghVdPVpRLXr7KYYm37Ztyr/n",
-  "./js/app.js": "sha384-ByX5+UK1jvqeiDjuolVySWIcUcjkh9ysyia130tZLc6qw35oKwIw0UHVWOkwBv+l",
+  "./js/app.js": "sha384-kfvFVPGS6qVCH+KvTl8l8bNfvWkIYOeameHg2BvXMVDI15AM7TKe3xEQuXF2Tw2O",
   "./js/certificados.js": "sha384-fcHwt21qppAv1vYFdyoLnxC3SIY2qLvQAJlNbUw4t5EGjQDDQb5nUSZRkW9+nINS",
   "./js/cofre-cripto.js": "sha384-90zk3E4fh8mlqZWQqK6+7sAkdtpICvJnVqPNcWPCSBia/X93nshZ85vMOZ8uW4YW",
   "./js/cofre-sessao.js": "sha384-U8KY9NNfu5A7J2h1NQWiz3nDZk7PCWhBUc2KUNGwkhRqHKkTOx6yWwdxvvDA2t4y",
@@ -31,15 +32,16 @@
   "./js/recuperar.js": "sha384-GaIb/Paekf+EhaBwbvIS07HAHv7DbIWzFTujhn2MAwPcrvY60cZk4P/5Cd/1eBVt",
   "./js/telas-admin.js": "sha384-V4QpmqKFDsptVWUYAHxsReGXc61/ToVtFcj78IO/G6QWtwpACvDX/P57+6qTpPjx",
   "./js/telas-associado.js": "sha384-HlEc4IEFGxX6xHt9qD5hbyGawGS/vyqemWyrIEGKe1EbENNkVJnVQnh8jMTmrrIE",
-  "./js/telas-cofre.js": "sha384-PrpvldRaRpn9ii7pAGoixATwg9hj3dzFvGLuDZYKpJH/jgYNN3g/u+Sv8p6xBK84",
+  "./js/telas-cofre.js": "sha384-1w9ZBgY/zKrRLLrwBJF9Q6eVnG/Qd8fzWf6TOQZ+Efu1WDqOyEfggrWn5fvYgMiX",
   "./js/termo.js": "sha384-FmehYKAfDDVOq9u7oKkRNbNOvKswZW+TCOAymXnDLDAroD4/UC4hkwERP251iCCg",
   "./js/ui.js": "sha384-0U0UMrWr8tlwdjENVc8i4FH6EN+PjzfiqKLGeZT1vzDkykiXgpArXBaM+/jdwKRF",
   "./vendor/libsodium-sumo.mjs": "sha384-6CExmTBhGBkeU97K/q0KEN9A/d/n9q/T7WdippDhSFGAAlIneqtVzaJfmm6+LUMb",
   "./vendor/libsodium-wrappers-sumo.mjs": "sha384-Ure8NooPSc0DiuY0mTMBNtSIgIaxz/eFxwaKJI/PChqRbmj80CIZ4fNY5e6DXL7K"
  }
 }</script>
+<link rel="modulepreload" href="js/agenda.js" integrity="sha384-tu/n26cQVdVd2lsGbPRaKm3zA6NIoWGdJUSDlg8dNntDQrjRUcZUC/giduG4FPhM">
 <link rel="modulepreload" href="js/api.js" integrity="sha384-wKl+Eh8cdNdezLK3Kox3VfFtFVm68AlU5qRHta3vghVdPVpRLXr7KYYm37Ztyr/n">
-<link rel="modulepreload" href="js/app.js" integrity="sha384-ByX5+UK1jvqeiDjuolVySWIcUcjkh9ysyia130tZLc6qw35oKwIw0UHVWOkwBv+l">
+<link rel="modulepreload" href="js/app.js" integrity="sha384-kfvFVPGS6qVCH+KvTl8l8bNfvWkIYOeameHg2BvXMVDI15AM7TKe3xEQuXF2Tw2O">
 <link rel="modulepreload" href="js/certificados.js" integrity="sha384-fcHwt21qppAv1vYFdyoLnxC3SIY2qLvQAJlNbUw4t5EGjQDDQb5nUSZRkW9+nINS">
 <link rel="modulepreload" href="js/cofre-cripto.js" integrity="sha384-90zk3E4fh8mlqZWQqK6+7sAkdtpICvJnVqPNcWPCSBia/X93nshZ85vMOZ8uW4YW">
 <link rel="modulepreload" href="js/cofre-sessao.js" integrity="sha384-U8KY9NNfu5A7J2h1NQWiz3nDZk7PCWhBUc2KUNGwkhRqHKkTOx6yWwdxvvDA2t4y">
@@ -57,12 +59,12 @@
 <link rel="modulepreload" href="js/recuperar.js" integrity="sha384-GaIb/Paekf+EhaBwbvIS07HAHv7DbIWzFTujhn2MAwPcrvY60cZk4P/5Cd/1eBVt">
 <link rel="modulepreload" href="js/telas-admin.js" integrity="sha384-V4QpmqKFDsptVWUYAHxsReGXc61/ToVtFcj78IO/G6QWtwpACvDX/P57+6qTpPjx">
 <link rel="modulepreload" href="js/telas-associado.js" integrity="sha384-HlEc4IEFGxX6xHt9qD5hbyGawGS/vyqemWyrIEGKe1EbENNkVJnVQnh8jMTmrrIE">
-<link rel="modulepreload" href="js/telas-cofre.js" integrity="sha384-PrpvldRaRpn9ii7pAGoixATwg9hj3dzFvGLuDZYKpJH/jgYNN3g/u+Sv8p6xBK84">
+<link rel="modulepreload" href="js/telas-cofre.js" integrity="sha384-1w9ZBgY/zKrRLLrwBJF9Q6eVnG/Qd8fzWf6TOQZ+Efu1WDqOyEfggrWn5fvYgMiX">
 <link rel="modulepreload" href="js/termo.js" integrity="sha384-FmehYKAfDDVOq9u7oKkRNbNOvKswZW+TCOAymXnDLDAroD4/UC4hkwERP251iCCg">
 <link rel="modulepreload" href="js/ui.js" integrity="sha384-0U0UMrWr8tlwdjENVc8i4FH6EN+PjzfiqKLGeZT1vzDkykiXgpArXBaM+/jdwKRF">
 <link rel="modulepreload" href="vendor/libsodium-sumo.mjs" integrity="sha384-6CExmTBhGBkeU97K/q0KEN9A/d/n9q/T7WdippDhSFGAAlIneqtVzaJfmm6+LUMb">
 <link rel="modulepreload" href="vendor/libsodium-wrappers-sumo.mjs" integrity="sha384-Ure8NooPSc0DiuY0mTMBNtSIgIaxz/eFxwaKJI/PChqRbmj80CIZ4fNY5e6DXL7K">
-<script type="module" src="js/app.js" integrity="sha384-ByX5+UK1jvqeiDjuolVySWIcUcjkh9ysyia130tZLc6qw35oKwIw0UHVWOkwBv+l"></script>
+<script type="module" src="js/app.js" integrity="sha384-kfvFVPGS6qVCH+KvTl8l8bNfvWkIYOeameHg2BvXMVDI15AM7TKe3xEQuXF2Tw2O"></script>
 </head>
 <body>
 <div id="app"><p class="carregando">Carregando...</p></div>

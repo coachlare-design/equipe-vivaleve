@@ -14,6 +14,7 @@ import { icone } from "./icones.js";
 import { palavrasPara } from "./frase.js";
 import * as sessaoCofre from "./cofre-sessao.js";
 import "./prontuario.js"; // Fase 2 (Construtor 2): cofre clínico, registra ganchos, rotas e menu
+import "./agenda.js"; // 03/10/2026: agenda da equipe (Calendly de cada profissional), só admin
 
 const raiz = document.getElementById("app");
 const estado = { usuario: null };
