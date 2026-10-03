@@ -956,7 +956,7 @@ export async function termo(el, _p, ctx) {
         h("span", {}, v.provisorio ? pill("provisória, pendente de redação jurídica", "w") : pill("definitiva", "g"), " ", pill(plural(v.aceites, "aceite", "aceites")))),
       h("p", { class: "pequeno", text: `Publicada em ${dataHoraBR(v.em)}` }),
       h("details", {}, h("summary", { text: "Ver o texto" }), h("div", { class: "texto-termo", text: v.texto })))),
-    h("details", { class: "card" }, h("summary", { text: "Publicar versão nova (quando o texto jurídico chegar)" }), form));
+    h("details", { class: "card" }, h("summary", { text: "Publicar versão nova do termo" }), form));
 }
 
 // ---------------------------------------------------------------- mais (celular)
