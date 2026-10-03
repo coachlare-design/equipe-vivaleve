@@ -91,6 +91,9 @@ ext.registrarMenu("admin", "#/cofre", "Cofre");
 
 // Inatividade: aos 13 min aparece o aviso "Continuar aqui"; aos 15 min a página avisa o app (evento), que sai SEM
 // recarregar: chave apagada, sessão encerrada no servidor e rascunho selado para a frase-senha da própria pessoa.
+// 03/10/2026 (pedido do Carlos): a tela Agenda é um painel para ficar aberto no computador. Nela, com a chave do
+// prontuário FECHADA, a vigia de 15 min não conta (a sessão do servidor segue valendo no máximo SESSAO_TTL_HORAS).
+const painelAgendaSemChave = () => location.hash.startsWith("#/agenda") && !cripto.cofre.privada;
 sessao.vigiarInatividade(15, () => { window.dispatchEvent(new Event("vl:inatividade")); },
-  () => Boolean(document.querySelector(".topo")) || Boolean(cripto.cofre.privada));
+  () => !painelAgendaSemChave() && (Boolean(document.querySelector(".topo")) || Boolean(cripto.cofre.privada)));
 window.addEventListener("pagehide", () => sessao.limparSessaoCofre());
