@@ -11,7 +11,7 @@ history.replaceState(null, "", location.pathname);
 
 function moldura(...filhos) {
   trocar(raiz, h("main", { class: "porta" }, h("div", { class: "caixa" },
-    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Viva Leve Psi"), ...filhos)));
+    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Conheça-TE Psi"), ...filhos)));
   window.scrollTo(0, 0);
 }
 

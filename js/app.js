@@ -163,7 +163,7 @@ function telaEntrada(mensagem = "") {
   h("button", { type: "submit", class: "btn", text: "Entrar" }),
   status);
   trocar(raiz, h("main", { class: "porta" }, h("div", { class: "caixa" },
-    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Viva Leve Psi · Equipe"),
+    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Conheça-TE Psi · Equipe"),
     h("h1", { text: "Entrar na plataforma" }),
     recado,
     h("div", { class: "card" }, form),
@@ -194,7 +194,7 @@ function telaAguardando(nome, email, imps, erro) {
   ultimoEmail = email || ultimoEmail;
   const primeiro = String(nome || "").split(" ")[0];
   trocar(raiz, h("main", { class: "porta" }, h("div", { class: "caixa" },
-    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Viva Leve Psi · Equipe"),
+    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Conheça-TE Psi · Equipe"),
     h("h1", { text: primeiro ? `${primeiro}, seu cadastro aguarda a aprovação` : "Cadastro aguardando aprovação" }),
     erro ? h("div", { class: "alerta r", role: "alert" }, h("b", { text: "Não deu para calcular o código" }), erro.message || "Tente de novo.")
       : h("div", { class: "card pilha" },
@@ -234,14 +234,14 @@ function montarCasca() {
   conteudo = h("main", { class: "conteudo", id: "conteudo", tabindex: "-1" });
   const topo = h("header", { class: "topo" },
     h("div", { class: "linha" },
-      // Rodada 4 (NP12): no celular, só "Viva Leve Psi" (o complemento quebrava em 2 linhas).
-      h("div", { class: "marca" }, h("span", { class: "ponto" }), "Viva Leve Psi", h("span", { class: "so-largo", text: admin ? " · Clínica" : " · Equipe" })),
+      // Rodada 4 (NP12): no celular, só "Conheça-TE Psi" (o complemento quebrava em 2 linhas).
+      h("div", { class: "marca" }, h("span", { class: "ponto" }), "Conheça-TE Psi", h("span", { class: "so-largo", text: admin ? " · Clínica" : " · Equipe" })),
       h("div", { class: "quem" }, h("span", { class: "nome", text: u.nome }),
         h("button", { type: "button", class: "btn mini ghost", text: "Sair", onclick: sair }))));
   const grupos = admin ? LATERAL_ADMIN : LATERAL_ASSOCIADO;
   const extras = ext.menus(admin ? "admin" : "associado").filter(([href]) => !grupos.some(([, itens]) => itens.some(([x]) => x === href)));
   const lateral = h("nav", { class: "lateral", "aria-label": "Seções" },
-    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Viva Leve Psi"),
+    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Conheça-TE Psi"),
     grupos.map(([titulo, itens]) => [h("div", { class: "grupo", text: titulo }), itens.map((x) => linkNav(x))]),
     extras.map(([href, rot]) => linkNav([href, rot, "menu"])));
   const inferior = h("nav", { class: "nav-inferior", "aria-label": "Seções principais" },

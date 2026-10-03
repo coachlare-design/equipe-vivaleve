@@ -22,7 +22,7 @@ const TOTAL = 4;
 
 function moldura(...filhos) {
   trocar(raiz, h("main", { class: "porta" }, h("div", { class: "caixa" },
-    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Viva Leve Psi · Equipe"), ...filhos)));
+    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Conheça-TE Psi · Equipe"), ...filhos)));
   window.scrollTo(0, 0);
 }
 
@@ -116,7 +116,7 @@ function blocoAutenticador(totp) {
   if (noCelular()) {
     return h("div", { class: "pilha" }, h("b", { text: "1. Ligue o app" }), semApp,
       h("ol", { class: "passo-a-passo pequeno" },
-        h("li", { text: "Toque em \"Abrir no app autenticador\". O app abre e já cadastra a Viva Leve Psi." }),
+        h("li", { text: "Toque em \"Abrir no app autenticador\". O app abre e já cadastra a Conheça-TE Psi." }),
         h("li", { text: "Se o app não abrir, toque em \"Copiar a chave\", abra o app, escolha \"inserir chave\" e cole." }),
         h("li", { text: "Volte para esta tela." })),
       h("div", { class: "acoes-linha" }, abrir, copiarChave), chave,

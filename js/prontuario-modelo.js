@@ -203,7 +203,7 @@ export function arvoreDocumento(modelo, meta) {
   const cabClinica = c.razao_social ? `${c.razao_social}${c.cnpj ? ` · CNPJ ${c.cnpj}` : ""}${c.rt_nome ? ` · Responsável técnico: ${c.rt_nome}${c.rt_crp ? `, CRP ${c.rt_crp}` : ""}` : ""}` : "";
   const destino = meta.finalidade ? ` Finalidade: ${meta.finalidade}${meta.destinatario ? `; destinatário: ${meta.destinatario}` : ""}.` : "";
   return ["article", { class: "doc-prontuario" },
-    ["header", {}, ["p", { class: "marca" }, "Viva Leve Psi · Equipe"],
+    ["header", {}, ["p", { class: "marca" }, "Conheça-TE Psi · Equipe"],
       cabClinica ? ["p", { class: "meta" }, cabClinica] : "",
       ["h1", {}, `Prontuário psicológico · ${meta.codigo}`],
       ["p", {}, `${modelo.nome || "(identificação não registrada)"} · plano ${meta.plano === "avulsa" ? "avulso" : (meta.plano || "")}`],

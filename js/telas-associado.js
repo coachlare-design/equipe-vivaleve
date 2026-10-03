@@ -142,7 +142,7 @@ function cartaoTermo(d, ctx) {
     return caixa;
   }
   const mostrarLink = (r) => {
-    const msg = `Olá! Antes da nossa primeira sessão, leia e aceite o termo de atendimento da clínica Viva Leve Psi neste link: ${r.link} (vale até ${dataBR(r.expira_em)}). Se pedir, o código é ${r.codigo}.`;
+    const msg = `Olá! Antes da nossa primeira sessão, leia e aceite o termo de atendimento da clínica Conheça-TE Psi neste link: ${r.link} (vale até ${dataBR(r.expira_em)}). Se pedir, o código é ${r.codigo}.`;
     const caixaMsg = caixaTexto(msg, "Mensagem pronta para o(a) paciente");
     const linkTexto = h("p", { class: "link-longo", text: r.link });
     trocar(zonaAcao, h("div", { class: "alerta b" }, h("b", { text: "Link criado" }),

@@ -384,7 +384,7 @@ export function caixaTexto(texto, rotulo = "Texto") {
 export function podeCompartilhar() {
   return typeof navigator.share === "function";
 }
-export async function compartilhar(texto, titulo = "Viva Leve Psi") {
+export async function compartilhar(texto, titulo = "Conheça-TE Psi") {
   try { await navigator.share({ title: titulo, text: texto }); return true; } catch (e) {
     if (e && e.name === "AbortError") return false; // a pessoa fechou a folha
     throw new Error("Não deu para abrir o compartilhamento. Use Copiar ou toque e segure o texto.");

@@ -8,7 +8,7 @@ const raiz = document.getElementById("app");
 
 function moldura(...filhos) {
   trocar(raiz, h("main", { class: "porta" }, h("div", { class: "caixa" },
-    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Viva Leve Psi · Equipe"), ...filhos)));
+    h("div", { class: "marca" }, h("span", { class: "ponto" }), "Conheça-TE Psi · Equipe"), ...filhos)));
 }
 
 function inicio() {
