@@ -37,7 +37,7 @@ button, input, select, textarea { font: inherit; }
 
 /* ---------- casca: topo, barra lateral (computador) e barra inferior (celular) ---------- */
 .marca { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1rem; color: var(--ink); }
-.marca .ponto { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--ceu-pastel), var(--ceu-deep)); flex: none; }
+.marca .ponto { width: 28px; height: 28px; border-radius: 50%; background: url("../img/te-marca-64.png") center / contain no-repeat; flex: none; }
 .casca { min-height: 100vh; }
 .topo { position: sticky; top: 0; z-index: 20; background: #FFFFFF; border-bottom: 1px solid var(--line); }
 .topo .linha { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 16px; max-width: 1080px; margin: 0 auto; }
